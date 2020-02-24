@@ -14,6 +14,10 @@ public class ApiMonitorProperty {
      */
     private String appId;
     /**
+     * 接口类型
+     */
+    private String type;
+    /**
      * http: 接口path
      * dubbo： Service名字.方法名
      */
@@ -82,5 +86,9 @@ public class ApiMonitorProperty {
      * 9999line 响应时长[ms]
      */
     private Double line9999Value;
+    /**
+     * 时间范围
+     */
+    private String timeRange;
 
 }
