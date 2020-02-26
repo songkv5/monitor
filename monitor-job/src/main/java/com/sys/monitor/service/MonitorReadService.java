@@ -1,17 +1,22 @@
 package com.sys.monitor.service;
 
-import com.sys.monitor.entity.MonitorItem;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.sys.monitor.entity.*;
 import com.sys.monitor.enums.ApiType;
 import com.sys.monitor.job.ApiCatMonitorTask;
+import com.sys.monitor.mapper.AppOwnerMapper;
+import com.sys.monitor.mapper.AppWhiteListMapper;
+import com.sys.monitor.mapper.MonitorConfigMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +27,13 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class MonitorReadService {
+    @Autowired
+    private MonitorConfigMapper monitorConfigMapper;
+    @Autowired
+    private AppOwnerMapper appOwnerMapper;
+    @Autowired
+    private AppWhiteListMapper whiteListMapper;
+
     public List<MonitorItem> listMonitors() {
         List<MonitorItem> result = new ArrayList<>();
         SAXReader reader = new SAXReader();
@@ -110,5 +122,45 @@ public class MonitorReadService {
             }
         }
         return result;
+    }
+
+    public List<MonitorConfigDetail> listFromDb() {
+        QueryWrapper<MonitorConfig> wrapper = Wrappers.<MonitorConfig>query()
+                .eq(MonitorConfig.IS_DELETED, 0);
+
+        List<MonitorConfig> list = monitorConfigMapper.selectList(wrapper);
+        if (list == null || list.size() ==0) {
+            return (List<MonitorConfigDetail>) Collections.EMPTY_LIST;
+        }
+
+        List<String> appIds = list.stream().map(arg -> arg.getAppId()).distinct().collect(Collectors.toList());
+        QueryWrapper<AppOwner> wrapperOwner = Wrappers.<AppOwner>query()
+                .in(AppOwner.APP_ID, appIds)
+                .eq(AppOwner.IS_DELETED, 0);
+        // 负责人
+        List<AppOwner> owners = appOwnerMapper.selectList(wrapperOwner);
+        Map<String, List<AppOwner>> ownerMap = Optional.ofNullable(owners).orElse((List<AppOwner>) Collections.EMPTY_LIST)
+                .stream().collect(Collectors.groupingBy(arg -> arg.getAppId()));
+
+        // 白名单
+        QueryWrapper<AppWhiteList> wrapperWl = Wrappers.<AppWhiteList>query()
+                .in(AppWhiteList.APP_ID, appIds)
+                .eq(AppWhiteList.IS_DELETED, 0);
+        List<AppWhiteList> whileLists = whiteListMapper.selectList(wrapperWl);
+        Map<String, List<AppWhiteList>> whiteMap = Optional.ofNullable(whileLists).orElse((List<AppWhiteList>) Collections.EMPTY_LIST)
+                .stream().collect(Collectors.groupingBy(arg -> arg.getAppId()));
+
+
+        return list.stream().map(arg -> {
+            MonitorConfigDetail result = new MonitorConfigDetail();
+            BeanUtils.copyProperties(arg, result);
+            List<AppOwner> appOwners = ownerMap.get(arg.getAppId());
+            result.setOwners(appOwners);
+
+            List<AppWhiteList> appWhiteLists = whiteMap.get(arg.getAppId());
+            result.setWhiteList(appWhiteLists);
+            return result;
+        }).collect(Collectors.toList());
+
     }
 }

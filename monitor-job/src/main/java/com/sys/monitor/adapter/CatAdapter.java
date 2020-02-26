@@ -39,7 +39,7 @@ public class CatAdapter {
             Date startDate = restReq.getStartDate();
             Date endDate = restReq.getEndDate();
             if (apiType != null) {
-                param.putIfAbsent("type", apiType.getCode());
+                param.putIfAbsent("type", apiType.getCatName());
             } else {
                 log.error("必要参数缺失:type");
                 return (List<ApiMonitorProperty>) Collections.EMPTY_LIST;

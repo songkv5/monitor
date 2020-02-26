@@ -78,7 +78,8 @@ public class DingService {
             }
         }
         if (entity != null) {
-            HttpUtil.sendPostJsonRequest(url, null, null, entity);
+            byte[] bytes = HttpUtil.sendPostJsonRequest(url, null, null, entity);
+
         }
     }
 
