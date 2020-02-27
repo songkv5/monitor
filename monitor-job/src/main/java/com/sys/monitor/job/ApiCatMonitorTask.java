@@ -109,7 +109,7 @@ public class ApiCatMonitorTask {
      * @param appApisMap
      */
     private void buildFile(Map<String, List<CatApiProperty4Excel>> appApisMap, String robot, Map<String, List<AppOwner>> ownerMap) {
-        ExcelBuildAdapter.ExcelBuilder<CatApiProperty4Excel> builder = ExcelBuildAdapter.<CatApiProperty4Excel>newBuilder("E:\\" + robot + ".xls")
+        ExcelBuildAdapter.ExcelBuilder<CatApiProperty4Excel> builder = ExcelBuildAdapter.<CatApiProperty4Excel>newBuilder("E:\\" + robot + "")
                 .maxRowPerSheet(1000)
                 .startColumnNum(1);
         Set<Map.Entry<String, List<CatApiProperty4Excel>>> entries = appApisMap.entrySet();
@@ -142,7 +142,7 @@ public class ApiCatMonitorTask {
         }
         ExcelBuildAdapter adapter = builder.get();
         // excel文件
-        File excelFile = adapter.getExcelFile();
+        File excelFile = adapter.getFile();
     }
 
     private CatApiProperty4Excel convertApiProperty(ApiMonitorProperty source) {

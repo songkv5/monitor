@@ -64,3 +64,4 @@ hs_err_pid*
 !/exmanager/bin/
 **/*.log*
 /temp/*
+**/application.yml

@@ -1,5 +1,10 @@
 package com.sys.monitor.component;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.sys.monitor.annotation.FieldQualifier;
 import com.sys.monitor.util.ClassUtil;
 import org.apache.poi.hssf.usermodel.*;
@@ -12,10 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author willis
@@ -25,13 +27,13 @@ import java.util.List;
 public class ExcelBuildAdapter {
     private static Logger logger = LoggerFactory.getLogger(ExcelBuildAdapter.class);
     private static final Integer DEFAULT_MAX_ROW_PER_SHEET = 65535;
-    private File excelFile;
+    private File file;
 
     private ExcelBuildAdapter() {
     }
 
-    public File getExcelFile() {
-        return excelFile;
+    public File getFile() {
+        return file;
     }
     public static <T> ExcelBuilder<T> newBuilder(String filePath) {
         return new ExcelBuilder<T>(filePath);
@@ -42,6 +44,8 @@ public class ExcelBuildAdapter {
         private HSSFWorkbook wb;
         private Integer maxRows;
         private int startColumnNum;
+        private FileType finalType = FileType.EXCEL;
+        private File pdfFile;
 
         public ExcelBuilder(String filePath) {
             this.filePath = filePath;
@@ -52,7 +56,7 @@ public class ExcelBuildAdapter {
 
         public ExcelBuildAdapter get() {
             ExcelBuildAdapter adapter = new ExcelBuildAdapter();
-            File desFile = new File(filePath);
+            File desFile = new File(filePath.concat(finalType.getSuffix()));
             File parentFile = desFile.getParentFile();
             if (!parentFile.exists()) {
                 parentFile.mkdir();
@@ -62,15 +66,61 @@ public class ExcelBuildAdapter {
                     desFile.createNewFile();
                 }
                 FileOutputStream fileOutputStream = new FileOutputStream(desFile);
-                wb.write(fileOutputStream);
+                switch (finalType) {
+                    case EXCEL:{
+                        wb.write(fileOutputStream);
+                        break;
+                    }
+                    case PDF:{
+                        break;
+                    }
+                }
+
                 fileOutputStream.close();
                 wb.close();
-                adapter.excelFile = desFile;
+                adapter.file = desFile;
             } catch (Exception e) {
             }
             return adapter;
         }
 
+        //TODO 有问题
+        private ExcelBuilder<T> convertPdf() {
+            HSSFSheet s = wb.getSheetAt(0);
+            Iterator<Row> iterator = s.iterator();
+            Document xls2Pdf = new Document();
+            try {
+                FileOutputStream pdfOs = new FileOutputStream(filePath.concat(FileType.PDF.getSuffix()));
+                PdfWriter pdfWriter = PdfWriter.getInstance(xls2Pdf, pdfOs);
+                xls2Pdf.open();
+                PdfPTable table = new PdfPTable(11);
+                PdfPCell pCell;
+
+                while(iterator.hasNext()) {
+                    Row row = iterator.next();
+                    Iterator<Cell> cellIterator = row.cellIterator();
+                    while(cellIterator.hasNext()) {
+                        Cell cell = cellIterator.next();
+                        switch(cell.getCellType()) {
+                            case STRING:
+                                pCell = new PdfPCell(new Phrase(cell.getStringCellValue()));
+                                table.addCell(pCell);
+                                break;
+                        }
+                        //next line
+                    }
+                }
+                xls2Pdf.add(table);
+                xls2Pdf.close();
+
+                finalType = FileType.PDF;
+                pdfWriter.close();
+                pdfOs.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return this;
+        }
         public ExcelBuilder<T> startColumnNum(int startColumnNum) {
             this.startColumnNum = startColumnNum;
             return this;
@@ -139,6 +189,7 @@ public class ExcelBuildAdapter {
             style.setFont(font);
             style.setAlignment(HorizontalAlignment.CENTER);
             style.setVerticalAlignment(VerticalAlignment.CENTER);
+            // 自动换行
             style.setWrapText(true);
             cell.setCellStyle(style);
             cell.setCellValue(new HSSFRichTextString(txt));
@@ -199,8 +250,8 @@ public class ExcelBuildAdapter {
                 for (int j_ = 0 ; j_ < columnCounts ; j_++) {//列
                     //新建一格
                     HSSFCell c = dataRow.createCell(j_ + startColumnNum);
-                    c.setCellStyle(cellStyleData(wb));
-                    //                        FieldEntry fieldEntry = fields.get(j_);
+                    c.setCellStyle(cellStyleData());
+                    // FieldEntry fieldEntry = fields.get(j_);
                     Field field = fields.get(j_);
                     FieldQualifier annotation = field.getAnnotation(FieldQualifier.class);
                     Class z = data.getClass();
@@ -281,20 +332,19 @@ public class ExcelBuildAdapter {
 
         /**
          * 数据样式
-         * @param wb
          * @return
          */
-        private static CellStyle cellStyleData(HSSFWorkbook wb) {
-            if (wb != null) {
-                //内容样式
-                CellStyle cellStyleData = wb.createCellStyle();
-                Font fontData = wb.createFont();
-                fontData.setFontName("微软雅黑");
-                cellStyleData = wb.createCellStyle();
-                cellStyleData.setFont(fontData);
-                return cellStyleData;
-            }
-            return null;
+        private CellStyle cellStyleData() {
+            //内容样式
+
+            HSSFCellStyle cellStyle = this.wb.createCellStyle();
+            Font fontData = wb.createFont();
+            fontData.setFontName("微软雅黑");
+            cellStyle = wb.createCellStyle();
+            cellStyle.setFont(fontData);
+            //自动换行
+            cellStyle.setWrapText(true);
+            return cellStyle;
         }
 
         /**
