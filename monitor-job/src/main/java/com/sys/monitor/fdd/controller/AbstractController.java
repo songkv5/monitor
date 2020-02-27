@@ -1,4 +1,4 @@
-package com.sys.monitor.controller;
+package com.sys.monitor.fdd.controller;
 
 import com.sys.monitor.exception.MonitorException;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * @desc
  * @since 2020年02月18日 17:28
  */
-public class AbstractController {
+public abstract class AbstractController {
     private final static Pattern NUM_PATTERN = Pattern.compile("[\\d]+");
     private final static DateFormat Y_M_D_H_M_S_FMT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final static DateFormat Y_M_D_FMT = new SimpleDateFormat("yyyy-MM-dd");

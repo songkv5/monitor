@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sys.monitor.mapper.MonitorRobotReportAttachMapper">
+<mapper namespace="com.sys.monitor.mapper.RobotStaticBackupMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.sys.monitor.entity.MonitorRobotReportAttach">
-        <id column="attach_id" property="attachId" />
+    <resultMap id="BaseResultMap" type="com.sys.monitor.entity.RobotStaticBackup">
+        <id column="backup_id" property="backupId" />
         <result column="ding_robot_token" property="dingRobotToken" />
         <result column="attach_url" property="attachUrl" />
         <result column="date_begin" property="dateBegin" />

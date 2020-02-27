@@ -65,3 +65,4 @@ hs_err_pid*
 **/*.log*
 /temp/*
 **/application.yml
+**/fdd/

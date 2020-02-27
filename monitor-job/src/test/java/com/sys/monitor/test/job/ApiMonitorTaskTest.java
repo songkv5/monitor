@@ -1,6 +1,6 @@
 package com.sys.monitor.test.job;
 
-import com.sys.monitor.job.ApiCatMonitorTask;
+import com.sys.monitor.fdd.job.ApiCatMonitorTask;
 import com.sys.monitor.test.BaseTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

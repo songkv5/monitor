@@ -44,14 +44,15 @@ public class ExcelBuildAdapter {
         private HSSFWorkbook wb;
         private Integer maxRows;
         private int startColumnNum;
+        private int startRowNum;
         private FileType finalType = FileType.EXCEL;
-        private File pdfFile;
 
         public ExcelBuilder(String filePath) {
             this.filePath = filePath;
             wb = new HSSFWorkbook();
             maxRows = DEFAULT_MAX_ROW_PER_SHEET;
             startColumnNum = 0;
+            startRowNum = 0;
         }
 
         public ExcelBuildAdapter get() {
@@ -80,6 +81,7 @@ public class ExcelBuildAdapter {
                 wb.close();
                 adapter.file = desFile;
             } catch (Exception e) {
+                logger.error("出错了，", e);
             }
             return adapter;
         }
@@ -123,6 +125,10 @@ public class ExcelBuildAdapter {
         }
         public ExcelBuilder<T> startColumnNum(int startColumnNum) {
             this.startColumnNum = startColumnNum;
+            return this;
+        }
+        public ExcelBuilder<T> startRowNum(int startRowNum) {
+            this.startRowNum = startRowNum;
             return this;
         }
         public ExcelBuilder<T> maxRowPerSheet(Integer maxRows) {
@@ -178,7 +184,11 @@ public class ExcelBuildAdapter {
             CellRangeAddress region  = new CellRangeAddress(frow, lrow, fcol, lcol);
             HSSFSheet sheet = newestSheet();
             sheet.addMergedRegion(region);
-            HSSFCell cell = sheet.getRow(frow).createCell(fcol);
+            HSSFRow row = sheet.getRow(frow);
+            if (row == null) {
+                row = sheet.createRow(frow);
+            }
+            HSSFCell cell = row.createCell(fcol);
             sheet.autoSizeColumn(fcol, true);
 
             HSSFCellStyle style = wb.createCellStyle();
@@ -202,8 +212,6 @@ public class ExcelBuildAdapter {
             Class clazz = datas.get(0).getClass();
             // 拿到最终的列表字段
             List<Field> fields = suitableField(clazz);
-            // 总列数
-            int columnCounts = fields.size();
             // 最新一个sheet
             HSSFSheet s = newestSheet();
             // 最后一行
@@ -211,7 +219,11 @@ public class ExcelBuildAdapter {
 
             try {
                 // 是否生成表头
-                if (rowNum == 0) {
+                if (rowNum == -1) {
+                    rowNum = this.startRowNum;
+                    createHead(s, rowNum, fields);
+                } else if (rowNum == 0) {
+                    rowNum += this.startRowNum;
                     createHead(s, rowNum, fields);
                 } else {
                     if (genTitle) {
@@ -222,7 +234,7 @@ public class ExcelBuildAdapter {
                 for (T data : datas) {
                     if (rowNum >= this.maxRows) {
                         s = wb.createSheet();
-                        rowNum = 0;
+                        rowNum = startRowNum;
                         createHead(s, rowNum, fields);
                     }
                     //写数据
@@ -343,7 +355,7 @@ public class ExcelBuildAdapter {
             cellStyle = wb.createCellStyle();
             cellStyle.setFont(fontData);
             //自动换行
-            cellStyle.setWrapText(true);
+//            cellStyle.setWrapText(true);
             return cellStyle;
         }
 

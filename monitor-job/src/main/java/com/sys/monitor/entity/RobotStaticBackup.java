@@ -10,24 +10,24 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- * 接口附件地址
+ * 接口统计备份
  * </p>
  *
  * @author willis
- * @since 2020-02-26
+ * @since 2020-02-27
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-public class MonitorRobotReportAttach implements Serializable {
+public class RobotStaticBackup implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 附件ID
+     * 备份ID
      */
-    @TableId(value = "attach_id", type = IdType.AUTO)
-    private Long attachId;
+    @TableId(value = "backup_id", type = IdType.AUTO)
+    private Long backupId;
 
     /**
      * 钉钉机器人token
@@ -70,7 +70,7 @@ public class MonitorRobotReportAttach implements Serializable {
     private Date updateTime;
 
 
-    public static final String ATTACH_ID = "attach_id";
+    public static final String BACKUP_ID = "backup_id";
 
     public static final String DING_ROBOT_TOKEN = "ding_robot_token";
 
