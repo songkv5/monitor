@@ -22,19 +22,19 @@ public class DingServiceTest extends BaseTest {
     @Test
     public void sendRobotMsgTest() {
         long ts = System.currentTimeMillis();
-        String secret = "SEC49739c3e71ff717bcf727b099f3a96dd35004f3d68454f94900008de1d30524c";
-        String token = "7c86750dc48c0e07809e7f7cc137dc5400dc538cffd66dc7dc6ab117d5c765ea";
+        String secret = "b7f6ffaa57027bc3a9f703f9ef91be77cb77b07075a590bf2c4710a32fdd6962";
+        String token = "b7f6ffaa57027bc3a9f703f9ef91be77cb77b07075a590bf2c4710a32fdd6962";
         //https://oapi.dingtalk.com/robot/send?access_token=7c86750dc48c0e07809e7f7cc137dc5400dc538cffd66dc7dc6ab117d5c765ea
         String sign = dingService.sign4Robot(secret, ts);
         RobotMsgReq.Builder builder = RobotMsgReq.newBuilder();
-        RobotMsg msg = RobotMsg.Builder.builder().atUserMobiles(Arrays.asList("17520487299"))
-                .content("hello")
+        RobotMsg msg = RobotMsg.Builder.builder().atUserMobiles(Arrays.asList("15099909560"))
+                .content("hello @15099909560")
                 .title("保重身体")
                 .build();
 
         RobotMsgReq rmr = builder.msgType(DingRobotMsgTypeEnum.TEXT)
-                .sign(sign)
-                .timestamp(ts)
+//                .sign(sign)
+//                .timestamp(ts)
                 .robotToken(token)
                 .msg(msg)
                 .build();

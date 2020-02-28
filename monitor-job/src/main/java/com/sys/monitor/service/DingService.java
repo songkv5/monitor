@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +80,12 @@ public class DingService {
         }
         if (entity != null) {
             byte[] bytes = HttpUtil.sendPostJsonRequest(url, null, null, entity);
+            try {
+                String result = new String(bytes, "utf-8");
+                log.info("钉钉消息发送结果：{}", result);
+            } catch (Exception e) {
+                log.error("发送钉钉消息失败", e);
+            }
 
         }
     }
@@ -181,6 +188,9 @@ public class DingService {
      * @return
      */
     public String sign4Robot(String secret, Long timestamp) {
+        if (secret == null) {
+            return null;
+        }
         try {
             String stringToSign = timestamp + "\n" + secret;
             Mac mac = Mac.getInstance("HmacSHA256");

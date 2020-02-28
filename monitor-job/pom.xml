@@ -198,6 +198,10 @@
                             <Class-Path>.</Class-Path>
                         </manifestEntries>
                     </archive>
+                    <excludes>
+                        <exclude>*.xml</exclude>
+                        <exclude>*.yml</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

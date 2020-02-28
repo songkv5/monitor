@@ -1,2 +1,2 @@
 bootClass=com.sys.monitor.Application
-nohup java -classpath ./lib/*;./config/* $bootClass 2>&1 &
+nohup java -classpath ../lib/*:../config/* $bootClass > /dev/null 2>&1 &

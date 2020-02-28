@@ -32,6 +32,7 @@ public class CatAdapter {
         Map<String, String> param = new HashMap<>();
         param.put("ip", "All");
         param.put("forceDownload", "json");
+        param.put("op", "history");
 
         if (restReq != null) {
             ApiType apiType = restReq.getApiType();

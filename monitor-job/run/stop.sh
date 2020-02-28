@@ -1,7 +1,10 @@
 crtDir=$(pwd)
-pids=$(ps -C java --no-heading -F --width 1500|grep $crtDir|awk '{print $2}')
+mainClass=com.sys.monitor.Application
+pids=$(ps -C java --no-heading -F --width 1500|grep $mainClass|awk '{print $2}')
 for pid in $pids
-  do kill $pid /dev/null 2>&1
+  do
+        echo "kill process $pid"
+        kill $pid /dev/null 2>&1
   done
 
 count=0
